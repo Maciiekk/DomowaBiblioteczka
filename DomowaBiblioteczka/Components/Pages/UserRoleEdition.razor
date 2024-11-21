@@ -1,0 +1,46 @@
+﻿@using DomowaBiblioteczka.Data
+@using DomowaBiblioteczka.Services.Users
+@using Microsoft.AspNetCore.Authorization
+
+@inject IUsersService usersService
+
+@attribute [Authorize(Roles = "Admin")]
+
+@rendermode InteractiveServer
+
+@page "/UserRoleEdition/{id}"
+
+<PageTitle>Users Edition</PageTitle>
+
+
+
+<div class="rz-p-12 rz-text-align-center">
+
+
+</div>
+
+@code
+{
+    [Parameter]
+    public string id { get; set; }
+
+    private CancellationTokenSource _cancellationTokenSource;
+
+    private ApplicationUser user;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Fetch the user data based on the ID
+        await InitializeData();
+
+        await base.OnInitializedAsync();
+    }
+
+    private async Task InitializeData()
+    {
+        _cancellationTokenSource = new CancellationTokenSource();
+
+        user = await usersService.SelectById(id,_cancellationTokenSource.Token);
+    }
+
+}

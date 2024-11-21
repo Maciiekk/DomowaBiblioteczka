@@ -1,6 +1,6 @@
 ﻿@using DomowaBiblioteczka.Components.Pages.Shared
+@using Microsoft.AspNetCore.Authorization
 @using Radzen
-
 
 @page "/"
 
@@ -11,3 +11,12 @@
 <div class="rz-p-12 rz-text-align-center">
     <RadzenButton Text="Click me!" class="rz-ripple" />
 </div>
+
+
+<AuthorizeView Roles="Admin">
+    <h1>Hi Admin</h1>
+</AuthorizeView>
+
+<AuthorizeView Roles="User,Admin">
+    <h1>Hi User</h1>
+</AuthorizeView>

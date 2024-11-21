@@ -2,12 +2,12 @@ using DomowaBiblioteczka.Components;
 using DomowaBiblioteczka.Components.Account;
 using DomowaBiblioteczka.Data;
 using DomowaBiblioteczka.Data.Seeder;
+using DomowaBiblioteczka.Services.Users;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Radzen;
-using static System.Formats.Asn1.AsnWriter;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +20,9 @@ builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 builder.Services.AddScoped<UserManager<ApplicationUser>>();
+
+// Data Services
+builder.Services.AddScoped<IUsersService, UsersService>();
 
 builder.Services.AddRadzenComponents();
 
@@ -34,11 +37,11 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 var mediaconnectionString = builder.Configuration.GetConnectionString("MediaConnection") ?? throw new InvalidOperationException("Connection string 'MediaConnection' not found.");
 
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
+builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
+options.UseSqlServer(connectionString));
 
-builder.Services.AddDbContext<MediaDbContext>(options =>
-    options.UseSqlServer(mediaconnectionString));
+builder.Services.AddDbContextFactory<MediaDbContext>(options =>
+options.UseSqlServer(connectionString));
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 

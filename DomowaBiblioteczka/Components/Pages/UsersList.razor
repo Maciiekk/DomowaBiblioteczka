@@ -1,0 +1,88 @@
+﻿@using DomowaBiblioteczka.Data
+@using DomowaBiblioteczka.Services.Users
+@using Microsoft.AspNetCore.Authorization
+@using static DomowaBiblioteczka.Globals
+
+@inject IUsersService usersService
+@inject NavigationManager Navigation
+
+@attribute [Authorize (Roles = "Admin")]
+
+@rendermode InteractiveServer
+
+@page "/UsersList"
+
+<PageTitle>List of users</PageTitle>
+
+<div class="rz-p-12 rz-text-align-center" style="width: 100%;">
+    <RadzenDataGrid 
+        Data="users"
+        AllowFiltering="true" 
+        FilterMode="FilterMode.Simple" 
+        AllowSorting="true" 
+        AllowPaging="true" 
+        PageSize="25" 
+        PagerHorizontalAlign="HorizontalAlign.Left"
+        ShowPagingSummary="true">
+        <Columns>
+            <RadzenDataGridColumn TItem="ApplicationUser" Property="UserName" Title="Name" Sortable="true" Filterable="true" />
+            <RadzenDataGridColumn TItem="ApplicationUser" Property="Email" Title="Email" Sortable="true" Filterable="true" />
+            <RadzenDataGridColumn Title="Edit" Width="75px" MinWidth="50px">
+                <Template Context = "user" >
+                    <RadzenButton Icon="Edit" ButtonStyle="ButtonStyle.Primary" Click=@(args => OnClick(Operations.Edit,user.Id)) />
+                </Template>
+            </RadzenDataGridColumn>              
+            <RadzenDataGridColumn Title="Roles" Width="75px" MinWidth="50px">
+                <Template Context = "user" >
+                    <RadzenButton Icon="License" ButtonStyle="ButtonStyle.Secondary" Click=@(args => OnClick(Operations.RolesChange,user.Id)) />
+                </Template>
+            </RadzenDataGridColumn>            
+            <RadzenDataGridColumn Title="Del" Width="75px" MinWidth="50px">
+                <Template Context = "user">
+                    <RadzenButton Icon="Delete" ButtonStyle="ButtonStyle.Warning" Click=@(args => OnClick(Operations.Delete,user.Id)) />
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+</div>
+
+
+@code 
+{
+    private IEnumerable<ApplicationUser> users;
+
+    private CancellationTokenSource _cancellationTokenSource;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await InitializeData();
+
+        await base.OnInitializedAsync();
+    }
+
+    private async Task InitializeData()
+    {
+        _cancellationTokenSource = new CancellationTokenSource();
+
+        users = await usersService.SelectAll(_cancellationTokenSource.Token);
+    }
+
+    private void OnClick(Operations operationType, string id)
+    {
+        if (operationType == Operations.Edit)
+        {
+            // TODO: implement in line edition
+            throw new NotImplementedException();
+        }
+        if (operationType == Operations.RolesChange)
+        {
+            Navigation.NavigateTo($"/UserRoleEdition/{id}");
+        }
+        
+        if (operationType == Operations.Delete)
+        {
+            // TODO: implement Confirmation before delete
+            throw new NotImplementedException();
+        }        
+    }
+}
