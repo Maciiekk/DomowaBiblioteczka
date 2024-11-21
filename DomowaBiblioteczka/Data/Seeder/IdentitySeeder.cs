@@ -32,19 +32,13 @@ namespace DomowaBiblioteczka.Data.Seeder
                 var adminUser = new ApplicationUser
                 {
                     UserName = "admin@admin.admin.com",
-                    NormalizedUserName = "ADMIN@ADMIN.ADMIN.COM",
-                    Email = "admin@admin.admin.com",
-                    NormalizedEmail = "ADMIN@ADMIN.ADMIN.COM",
-                    EmailConfirmed = true,
+                    Email = "admin@admin.admin.com"
                 };
 
                 var normalUser = new ApplicationUser
                 {
                     UserName = "adam.abacki@email.pl",
-                    NormalizedUserName = "ADAM.ABACKI@EMAIL.PL",
                     Email = "adam.abacki@email.pl",
-                    NormalizedEmail = "ADAM.ABACKI@EMAIL.PL",
-                    EmailConfirmed = true,
                 };
 
                 await userManager.CreateAsync(adminUser, "zxcV1234!");

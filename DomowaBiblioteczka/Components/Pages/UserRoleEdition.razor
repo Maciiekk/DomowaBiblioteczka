@@ -24,8 +24,6 @@
     [Parameter]
     public string id { get; set; }
 
-    private CancellationTokenSource _cancellationTokenSource;
-
     private ApplicationUser user;
 
     protected override async Task OnInitializedAsync()
@@ -38,9 +36,7 @@
 
     private async Task InitializeData()
     {
-        _cancellationTokenSource = new CancellationTokenSource();
-
-        user = await usersService.SelectById(id,_cancellationTokenSource.Token);
+        user = await usersService.SelectById(id);
     }
 
 }

@@ -51,8 +51,6 @@
 {
     private IEnumerable<ApplicationUser> users;
 
-    private CancellationTokenSource _cancellationTokenSource;
-
     protected override async Task OnInitializedAsync()
     {
         await InitializeData();
@@ -62,9 +60,7 @@
 
     private async Task InitializeData()
     {
-        _cancellationTokenSource = new CancellationTokenSource();
-
-        users = await usersService.SelectAll(_cancellationTokenSource.Token);
+        users = await usersService.SelectAll();
     }
 
     private void OnClick(Operations operationType, string id)
