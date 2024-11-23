@@ -1,6 +1,9 @@
-﻿namespace DomowaBiblioteczka.Services.KeyWords
+﻿using DomowaBiblioteczka.Data.Models;
+using DomowaBiblioteczka.Services.Comon;
+
+namespace DomowaBiblioteczka.Services.KeyWords
 {
-    public interface IKeyWordsService
+    public interface IKeyWordsService : ICRUDService<KeyWord>
     {
     }
 }

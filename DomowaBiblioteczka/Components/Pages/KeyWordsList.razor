@@ -1,19 +1,19 @@
-﻿@using DomowaBiblioteczka.Data
-@using DomowaBiblioteczka.Data.Models
-@using DomowaBiblioteczka.Services.Authors
+﻿@using DomowaBiblioteczka.Data.Models
+@using DomowaBiblioteczka.Services.KeyWords
 @using Microsoft.AspNetCore.Authorization
 @using static DomowaBiblioteczka.Globals
 
+
 @inject DialogService DialogService
-@inject IAuthorsService authorsService
+@inject IKeyWordsService keyWordService
 
 @attribute [Authorize(Roles = "Admin")]
 
 @rendermode InteractiveServer
 
-@page "/AuthorsList"
+@page "/keyWordsList"
 
-<PageTitle>List of authors</PageTitle>
+<PageTitle>List of Key Words</PageTitle>
 
 @if (isLoading)
 {
@@ -25,7 +25,7 @@
 else
 {
     <div class="rz-p-12 rz-text-align-center" style="width: 100%;">
-        <RadzenDataGrid Data="authorsList"
+        <RadzenDataGrid Data="keyWordsList"
                         AllowFiltering="true"
                         FilterMode="FilterMode.Simple"
                         AllowSorting="true"
@@ -33,34 +33,29 @@ else
                         PageSize="25"
                         PagerHorizontalAlign="HorizontalAlign.Left"
                         ShowPagingSummary="true"
-                        @ref=authorsGrid>
+                        @ref=keyWordsGrid>
 
             <HeaderTemplate>
                 <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle" Text="Add New Order" Click="@InsertRow" Disabled="@(editing)" />
             </HeaderTemplate>
             <Columns>
-                <RadzenDataGridColumn TItem="Author" Property="Name" Title="Name" Sortable="true" Filterable="true">
-                    <EditTemplate Context="author">
-                        <RadzenTextBox @bind-Value="author.Name" MaxLength="200" Style="width: 100%" />
-                    </EditTemplate>
-                </RadzenDataGridColumn>
-                <RadzenDataGridColumn TItem="Author" Property="Description" Title="Description" Sortable="true" Filterable="true">
-                    <EditTemplate Context="author">
-                        <RadzenTextArea @bind-Value="author.Description" MaxLength="1000" Style="width: 100%"/>
+                <RadzenDataGridColumn TItem="KeyWord" Property="Word" Title="Word" Sortable="true" Filterable="true">
+                    <EditTemplate Context="KeyWord">
+                        <RadzenTextBox @bind-Value="KeyWord.Word" MaxLength="100" Style="width: 100%" />
                     </EditTemplate>
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn Title="Edit" Width="100px" MinWidth="100px">
-                    <Template Context="author">
-                        <RadzenButton Icon="Edit" ButtonStyle="ButtonStyle.Primary" Click=@(args => OnClick(Operations.ChangeMode,author)) />
+                    <Template Context="KeyWord">
+                        <RadzenButton Icon="Edit" ButtonStyle="ButtonStyle.Primary" Click=@(args => OnClick(Operations.ChangeMode,KeyWord)) />
                     </Template>
-                    <EditTemplate Context="author">
-                        <RadzenButton Icon="Check" ButtonStyle="ButtonStyle.Success" Click=@(args => OnClick(Operations.Edit,author)) />
-                        <RadzenButton Icon="Close" ButtonStyle="ButtonStyle.Warning" Click=@(args => OnClick(Operations.Cancel,author)) />
+                    <EditTemplate Context="KeyWord">
+                        <RadzenButton Icon="Check" ButtonStyle="ButtonStyle.Success" Click=@(args => OnClick(Operations.Edit,KeyWord)) />
+                        <RadzenButton Icon="Close" ButtonStyle="ButtonStyle.Warning" Click=@(args => OnClick(Operations.Cancel,KeyWord)) />
                     </EditTemplate>
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn Title="Del" Width="75px" MinWidth="50px">
-                    <Template Context="author">
-                        <RadzenButton Icon="Delete" ButtonStyle="ButtonStyle.Danger" Click=@(args => OnClick(Operations.Delete,author)) />
+                    <Template Context="KeyWord">
+                        <RadzenButton Icon="Delete" ButtonStyle="ButtonStyle.Danger" Click=@(args => OnClick(Operations.Delete,KeyWord)) />
                     </Template>
                 </RadzenDataGridColumn>
             </Columns>
@@ -71,12 +66,12 @@ else
 @code
 {
     //TODO: add column with coma separated roles
+    private IEnumerable<KeyWord> keyWordsList;
 
-    private IEnumerable<Author> authorsList;
+    private RadzenDataGrid<KeyWord> keyWordsGrid;
 
-    private RadzenDataGrid<Author> authorsGrid;
     private DataGridEditMode editMode = DataGridEditMode.Single;
-    private Author originalAuthor;
+    private KeyWord originalKeyWord;
 
     private bool isLoading = true;
     private bool editing = false;
@@ -94,47 +89,47 @@ else
 
     private async Task InitializeData()
     {
-        authorsList = await authorsService.GetAllAsync();
+        keyWordsList = await keyWordService.GetAllAsync();
 
     }
 
     async Task InsertRow()
     {
-        var order = new Author();
-        await authorsGrid.InsertRow(order);
+        var order = new KeyWord();
+        await keyWordsGrid.InsertRow(order);
     }
 
-    private async Task OnClick(Operations operationType, Author author)
+    private async Task OnClick(Operations operationType, KeyWord keyWord)
     {
         if (operationType == Operations.Edit)
         {
             //TODO: Implement UI side validation
 
-            if (authorsList.Any(a => a.Id.Equals(author.Id)))
+            if (keyWordsList.Any(a => a.Id.Equals(keyWord.Id)))
             {
-                await authorsService.UpdateAsync(author);
+                await keyWordService.UpdateAsync(keyWord);
             }
             else
             {
-                await authorsService.AddAsync(author);
+                await keyWordService.AddAsync(keyWord);
                 await InitializeData();
             }
-            await authorsGrid.UpdateRow(author);
+            await keyWordsGrid.UpdateRow(keyWord);
             //TODO: Implement pop up about succeded operation or fail
         }
 
         if (operationType == Operations.Cancel)
         {
-            authorsGrid.CancelEditRow(originalAuthor);
+            keyWordsGrid.CancelEditRow(originalKeyWord);
             await InitializeData();
             editing = false;
         }
 
         if (operationType == Operations.ChangeMode)
         {
-            originalAuthor = author;
+            originalKeyWord = keyWord;
             editing = true;
-            await authorsGrid.EditRow(author);
+            await keyWordsGrid.EditRow(keyWord);
 
         }
 
@@ -142,15 +137,15 @@ else
         {
             var result = await DialogService.Confirm(
            "Are you sure?",
-           $"Delete user {author.Name}",
+           $"Delete user {keyWord.Word}",
            new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" }
        );
             if (result == true)
             {
-                await authorsService.DeleteAsync(author.Id);
+                await keyWordService.DeleteAsync(keyWord.Id);
 
                 await InitializeData();
             }
-        }    
+        }
     }
 }
