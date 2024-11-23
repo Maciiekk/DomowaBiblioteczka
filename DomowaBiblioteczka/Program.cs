@@ -2,6 +2,7 @@ using DomowaBiblioteczka.Components;
 using DomowaBiblioteczka.Components.Account;
 using DomowaBiblioteczka.Data;
 using DomowaBiblioteczka.Data.Seeder;
+using DomowaBiblioteczka.Services.Authors;
 using DomowaBiblioteczka.Services.Roles;
 using DomowaBiblioteczka.Services.Users;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -27,6 +28,7 @@ builder.Services.AddScoped<UserManager<ApplicationUser>>();
 // Data Services
 builder.Services.AddScoped<IUsersService, UsersService>();
 builder.Services.AddScoped<IRolesService, RolesService>();
+builder.Services.AddScoped<IAuthorsService, AuthorsService>();
 
 builder.Services.AddRadzenComponents();
 

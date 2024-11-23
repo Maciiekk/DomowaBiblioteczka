@@ -20,8 +20,7 @@
 
         public ICollection<KeyWord> Keywords { get; set; }
 
-        public int AuthorId { get; set; }
-        public Author Author { get; set; }
+        public ICollection<Author> Authors { get; set; }
         public int MediaTypeID { get; set; }
         public MediaType MediaType { get; set; }
 

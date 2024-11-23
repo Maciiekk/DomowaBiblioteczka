@@ -86,7 +86,7 @@ namespace DomowaBiblioteczka.Data.Seeder
                             CreatedDate = DateTime.UtcNow,
                             ReleseDate = DateTime.UtcNow.AddYears(-2),
                             MediaTypeID = mediaType.Id,
-                            AuthorId = author.Id,
+                            Authors = new List<Author> { author },
                             TimeOrPages = 350,
                         },
                         new Media
@@ -96,7 +96,7 @@ namespace DomowaBiblioteczka.Data.Seeder
                             CreatedDate = DateTime.UtcNow,
                             ReleseDate = DateTime.UtcNow.AddYears(-1),
                             MediaTypeID = mediaType.Id,
-                            AuthorId = author.Id,
+                            Authors = new List<Author> { author },
                             TimeOrPages = 320,
                         }
                         );

@@ -34,13 +34,6 @@ namespace DomowaBiblioteczka.Data
                 .HasForeignKey(i => i.IndustryTypeId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Media and Author: One-to-Many
-            modelBuilder.Entity<Author>()
-                .HasMany(a => a.Medias)
-                .WithOne(m => m.Author)
-                .HasForeignKey(m => m.AuthorId)
-                .OnDelete(DeleteBehavior.Restrict);
-
             // Media and MediaSection: One-to-Many
             modelBuilder.Entity<Media>()
                 .HasMany(m => m.Sections)
@@ -52,7 +45,13 @@ namespace DomowaBiblioteczka.Data
             modelBuilder.Entity<Media>()
                 .HasMany(m => m.Keywords)
                 .WithMany(k => k.Medias)
-                .UsingEntity(j => j.ToTable("MediaKeywords")); // Optional join table name
+                .UsingEntity(j => j.ToTable("MediaKeywords")); // Optional join table name           
+            
+            // Media and Author: Many-to-Many
+            modelBuilder.Entity<Media>()
+                .HasMany(m => m.Authors)
+                .WithMany(k => k.Medias)
+                .UsingEntity(j => j.ToTable("MediaAuthors")); // Optional join table name
 
             // MediaSection: Additional Configuration
             modelBuilder.Entity<MediaSection>()
