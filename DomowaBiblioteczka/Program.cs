@@ -3,6 +3,7 @@ using DomowaBiblioteczka.Components.Account;
 using DomowaBiblioteczka.Data;
 using DomowaBiblioteczka.Data.Seeder;
 using DomowaBiblioteczka.Services.Authors;
+using DomowaBiblioteczka.Services.IndustryTypes;
 using DomowaBiblioteczka.Services.KeyWords;
 using DomowaBiblioteczka.Services.Medias;
 using DomowaBiblioteczka.Services.MediaSections;
@@ -37,6 +38,7 @@ builder.Services.AddScoped<IKeyWordsService, KeyWordsService>();
 builder.Services.AddScoped<IMediaSectionsService, MediaSectionsService>();
 builder.Services.AddScoped<IMediasService, MediasService>();
 builder.Services.AddScoped<IMediaTypesService, MediaTypesService>();
+builder.Services.AddScoped<IIndustryTypesService, IndustryTypesService>();
 
 
 builder.Services.AddRadzenComponents();
