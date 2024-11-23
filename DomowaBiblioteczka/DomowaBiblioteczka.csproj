@@ -18,8 +18,4 @@
     <PackageReference Include="Radzen.Blazor" Version="5.6.1" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Services\Industries\" />
-  </ItemGroup>
-
 </Project>

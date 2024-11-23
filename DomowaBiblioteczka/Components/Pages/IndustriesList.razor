@@ -1,0 +1,167 @@
+﻿@using DomowaBiblioteczka.Data.Models
+@using DomowaBiblioteczka.Services.Industries
+@using DomowaBiblioteczka.Services.IndustryTypes
+@using Microsoft.AspNetCore.Authorization
+@using static DomowaBiblioteczka.Globals
+
+
+@inject DialogService DialogService
+@inject IIndustriesService industrieservice
+@inject IIndustryTypesService industryTypesService
+
+@attribute [Authorize(Roles = "Admin")]
+
+@rendermode InteractiveServer
+
+@page "/IndustriesList"
+
+<PageTitle>List of Key Names</PageTitle>
+
+@if (isLoading)
+{
+    <div class="rz-text-align-center">
+        <RadzenProgressBar Mode="ProgressBarMode.Indeterminate" />
+        <p>Loading data...</p>
+    </div>
+}
+else
+{
+    <div class="rz-p-12 rz-text-align-center" style="width: 100%;">
+        <RadzenDataGrid Data="industriesList"
+                        AllowFiltering="true"
+                        FilterMode="FilterMode.Simple"
+                        AllowSorting="true"
+                        AllowPaging="true"
+                        PageSize="25"
+                        PagerHorizontalAlign="HorizontalAlign.Left"
+                        ShowPagingSummary="true"
+                        @ref=industriesGrid>
+
+            <HeaderTemplate>
+                <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle" Text="Add New Order" Click="@InsertRow" Disabled="@(editing)" />
+            </HeaderTemplate>
+            <Columns>
+                <RadzenDataGridColumn TItem="Industry" Property="Name" Title="Name" Sortable="true" Filterable="true">
+                    <EditTemplate Context="Industry">
+                        <RadzenTextBox @bind-Value="Industry.Name" MaxLength="100" Style="width: 100%" />
+                    </EditTemplate>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Industry" Property="Description" Title="Description" Sortable="false" Filterable="true">
+                    <EditTemplate Context="Industry">
+                        <RadzenTextArea @bind-Value="Industry.Description" MaxLength="1000" Style="width: 100%" />
+                    </EditTemplate>
+                </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn TItem="Industry" Property="IndustryType.Name" Title="Type" Sortable="true" Filterable="true">
+                    <EditTemplate Context="Industry">
+                        <RadzenDropDown @bind-Value="Industry.IndustryTypeId" Data="@industryTypesList" TextProperty="Name" ValueProperty="Id" Style="width:100%; display: block;" />
+                    </EditTemplate>
+                </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn Title="Edit" Width="100px" MinWidth="100px">
+                    <Template Context="Industry">
+                        <RadzenButton Icon="Edit" ButtonStyle="ButtonStyle.Primary" Click=@(args => OnClick(Operations.ChangeMode,Industry)) />
+                    </Template>
+                    <EditTemplate Context="Industry">
+                        <RadzenButton Icon="Check" ButtonStyle="ButtonStyle.Success" Click=@(args => OnClick(Operations.Edit,Industry)) />
+                        <RadzenButton Icon="Close" ButtonStyle="ButtonStyle.Warning" Click=@(args => OnClick(Operations.Cancel,Industry)) />
+                    </EditTemplate>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Title="Del" Width="75px" MinWidth="50px">
+                    <Template Context="Industry">
+                        <RadzenButton Icon="Delete" ButtonStyle="ButtonStyle.Danger" Click=@(args => OnClick(Operations.Delete,Industry)) />
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
+    </div>
+
+}
+@code
+{
+    //TODO: add column with coma separated roles
+    private IEnumerable<Industry> industriesList;
+    private IEnumerable<IndustryType> industryTypesList;
+
+    private RadzenDataGrid<Industry> industriesGrid;
+
+    private DataGridEditMode editMode = DataGridEditMode.Single;
+    private Industry originalIndustry;
+
+    private bool isLoading = true;
+    private bool editing = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+
+        await InitializeData();
+
+        isLoading = false;
+
+        await base.OnInitializedAsync();
+    }
+
+    private async Task InitializeData()
+    {
+        industriesList = await industrieservice.GetAllAsync();
+        industryTypesList = await industryTypesService.GetAllAsync();
+    }
+
+    async Task InsertRow()
+    {
+        var order = new Industry();
+        await industriesGrid.InsertRow(order);
+    }
+
+    private async Task OnClick(Operations operationType, Industry industry)
+    {
+        if (operationType == Operations.Edit)
+        {
+            //TODO: Implement UI side validation
+
+            if (industriesList.Any(a => a.Id.Equals(industry.Id)))
+            {
+                await industrieservice.UpdateAsync(industry);
+            }
+            else
+            {
+                await industrieservice.AddAsync(industry);
+                await InitializeData();
+            }
+            await industriesGrid.UpdateRow(industry);
+            editing = false;
+            //TODO: Implement pop up about succeded operation or fail
+        }
+
+        if (operationType == Operations.Cancel)
+        {
+            industriesGrid.CancelEditRow(originalIndustry);
+            await InitializeData();
+            editing = false;
+        }
+
+        if (operationType == Operations.ChangeMode)
+        {
+            originalIndustry = industry;
+            editing = true;
+            await industriesGrid.EditRow(industry);
+
+        }
+
+        if (operationType == Operations.Delete)
+        {
+            var result = await DialogService.Confirm(
+           "Are you sure?",
+           $"Delete: {industry.Name}",
+           new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" }
+       );
+            if (result == true)
+            {
+                await industrieservice.DeleteAsync(industry.Id);
+
+                await InitializeData();
+            }
+        }
+    }
+}
