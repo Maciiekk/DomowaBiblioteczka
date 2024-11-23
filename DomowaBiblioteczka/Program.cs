@@ -6,6 +6,7 @@ using DomowaBiblioteczka.Services.Authors;
 using DomowaBiblioteczka.Services.KeyWords;
 using DomowaBiblioteczka.Services.Medias;
 using DomowaBiblioteczka.Services.MediaSections;
+using DomowaBiblioteczka.Services.MediaTypes;
 using DomowaBiblioteczka.Services.Roles;
 using DomowaBiblioteczka.Services.Users;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -35,6 +36,7 @@ builder.Services.AddScoped<IAuthorsService, AuthorsService>();
 builder.Services.AddScoped<IKeyWordsService, KeyWordsService>();
 builder.Services.AddScoped<IMediaSectionsService, MediaSectionsService>();
 builder.Services.AddScoped<IMediasService, MediasService>();
+builder.Services.AddScoped<IMediaTypesService, MediaTypesService>();
 
 
 builder.Services.AddRadzenComponents();

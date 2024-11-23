@@ -21,7 +21,6 @@
   <ItemGroup>
     <Folder Include="Services\Industries\" />
     <Folder Include="Services\IndustriesTypes\" />
-    <Folder Include="Services\MediaTypes\" />
   </ItemGroup>
 
 </Project>

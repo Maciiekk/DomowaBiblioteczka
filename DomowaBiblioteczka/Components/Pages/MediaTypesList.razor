@@ -1,19 +1,19 @@
 ﻿@using DomowaBiblioteczka.Data.Models
-@using DomowaBiblioteczka.Services.KeyWords
+@using DomowaBiblioteczka.Services.MediaTypes
 @using Microsoft.AspNetCore.Authorization
 @using static DomowaBiblioteczka.Globals
 
 
 @inject DialogService DialogService
-@inject IKeyWordsService keyWordService
+@inject IMediaTypesService mediaTypeService
 
 @attribute [Authorize(Roles = "Admin")]
 
 @rendermode InteractiveServer
 
-@page "/keyWordsList"
+@page "/MediaTypesList"
 
-<PageTitle>List of Key Words</PageTitle>
+<PageTitle>List of Key Names</PageTitle>
 
 @if (isLoading)
 {
@@ -25,7 +25,7 @@
 else
 {
     <div class="rz-p-12 rz-text-align-center" style="width: 100%;">
-        <RadzenDataGrid Data="keyWordsList"
+        <RadzenDataGrid Data="mediaTypesList"
                         AllowFiltering="true"
                         FilterMode="FilterMode.Simple"
                         AllowSorting="true"
@@ -33,29 +33,29 @@ else
                         PageSize="25"
                         PagerHorizontalAlign="HorizontalAlign.Left"
                         ShowPagingSummary="true"
-                        @ref=keyWordsGrid>
+                        @ref=mediaTypesGrid>
 
             <HeaderTemplate>
                 <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle" Text="Add New Order" Click="@InsertRow" Disabled="@(editing)" />
             </HeaderTemplate>
             <Columns>
-                <RadzenDataGridColumn TItem="KeyWord" Property="Word" Title="Word" Sortable="true" Filterable="true">
-                    <EditTemplate Context="KeyWord">
-                        <RadzenTextBox @bind-Value="KeyWord.Word" MaxLength="100" Style="width: 100%" />
+                <RadzenDataGridColumn TItem="MediaType" Property="Name" Title="Name" Sortable="true" Filterable="true">
+                    <EditTemplate Context="MediaType">
+                        <RadzenTextBox @bind-Value="MediaType.Name" MaxLength="100" Style="width: 100%" />
                     </EditTemplate>
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn Title="Edit" Width="100px" MinWidth="100px">
-                    <Template Context="KeyWord">
-                        <RadzenButton Icon="Edit" ButtonStyle="ButtonStyle.Primary" Click=@(args => OnClick(Operations.ChangeMode,KeyWord)) />
+                    <Template Context="MediaType">
+                        <RadzenButton Icon="Edit" ButtonStyle="ButtonStyle.Primary" Click=@(args => OnClick(Operations.ChangeMode,MediaType)) />
                     </Template>
-                    <EditTemplate Context="KeyWord">
-                        <RadzenButton Icon="Check" ButtonStyle="ButtonStyle.Success" Click=@(args => OnClick(Operations.Edit,KeyWord)) />
-                        <RadzenButton Icon="Close" ButtonStyle="ButtonStyle.Warning" Click=@(args => OnClick(Operations.Cancel,KeyWord)) />
+                    <EditTemplate Context="MediaType">
+                        <RadzenButton Icon="Check" ButtonStyle="ButtonStyle.Success" Click=@(args => OnClick(Operations.Edit,MediaType)) />
+                        <RadzenButton Icon="Close" ButtonStyle="ButtonStyle.Warning" Click=@(args => OnClick(Operations.Cancel,MediaType)) />
                     </EditTemplate>
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn Title="Del" Width="75px" MinWidth="50px">
-                    <Template Context="KeyWord">
-                        <RadzenButton Icon="Delete" ButtonStyle="ButtonStyle.Danger" Click=@(args => OnClick(Operations.Delete,KeyWord)) />
+                    <Template Context="MediaType">
+                        <RadzenButton Icon="Delete" ButtonStyle="ButtonStyle.Danger" Click=@(args => OnClick(Operations.Delete,MediaType)) />
                     </Template>
                 </RadzenDataGridColumn>
             </Columns>
@@ -66,12 +66,12 @@ else
 @code
 {
     //TODO: add column with coma separated roles
-    private IEnumerable<KeyWord> keyWordsList;
+    private IEnumerable<MediaType> mediaTypesList;
 
-    private RadzenDataGrid<KeyWord> keyWordsGrid;
+    private RadzenDataGrid<MediaType> mediaTypesGrid;
 
     private DataGridEditMode editMode = DataGridEditMode.Single;
-    private KeyWord originalKeyWord;
+    private MediaType originalMediaType;
 
     private bool isLoading = true;
     private bool editing = false;
@@ -89,48 +89,48 @@ else
 
     private async Task InitializeData()
     {
-        keyWordsList = await keyWordService.GetAllAsync();
+        mediaTypesList = await mediaTypeService.GetAllAsync();
 
     }
 
     async Task InsertRow()
     {
-        var order = new KeyWord();
-        await keyWordsGrid.InsertRow(order);
+        var order = new MediaType();
+        await mediaTypesGrid.InsertRow(order);
     }
 
-    private async Task OnClick(Operations operationType, KeyWord keyWord)
+    private async Task OnClick(Operations operationType, MediaType mediaType)
     {
         if (operationType == Operations.Edit)
         {
             //TODO: Implement UI side validation
 
-            if (keyWordsList.Any(a => a.Id.Equals(keyWord.Id)))
+            if (mediaTypesList.Any(a => a.Id.Equals(mediaType.Id)))
             {
-                await keyWordService.UpdateAsync(keyWord);
+                await mediaTypeService.UpdateAsync(mediaType);
             }
             else
             {
-                await keyWordService.AddAsync(keyWord);
+                await mediaTypeService.AddAsync(mediaType);
                 await InitializeData();
             }
-            await keyWordsGrid.UpdateRow(keyWord);
+            await mediaTypesGrid.UpdateRow(mediaType);
             editing = false;
             //TODO: Implement pop up about succeded operation or fail
         }
 
         if (operationType == Operations.Cancel)
         {
-            keyWordsGrid.CancelEditRow(originalKeyWord);
+            mediaTypesGrid.CancelEditRow(originalMediaType);
             await InitializeData();
             editing = false;
         }
 
         if (operationType == Operations.ChangeMode)
         {
-            originalKeyWord = keyWord;
+            originalMediaType = mediaType;
             editing = true;
-            await keyWordsGrid.EditRow(keyWord);
+            await mediaTypesGrid.EditRow(mediaType);
 
         }
 
@@ -138,12 +138,12 @@ else
         {
             var result = await DialogService.Confirm(
            "Are you sure?",
-           $"Delete: {keyWord.Word}",
+           $"Delete: {mediaType.Name}",
            new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" }
        );
             if (result == true)
             {
-                await keyWordService.DeleteAsync(keyWord.Id);
+                await mediaTypeService.DeleteAsync(mediaType.Id);
 
                 await InitializeData();
             }
