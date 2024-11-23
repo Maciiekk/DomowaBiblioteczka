@@ -23,8 +23,8 @@
                 <hr />
                 <ValidationSummary class="text-danger" role="alert" />
                 <div class="form-floating mb-3">
-                    <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-                    <label for="email" class="form-label">Email</label>
+                    <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name" />
+                    <label for="email" class="form-label">User Name</label>
                     <ValidationMessage For="() => Input.Email" class="text-danger" />
                 </div>
                 <div class="form-floating mb-3">
@@ -115,7 +115,6 @@
     private sealed class InputModel
     {
         [Required]
-        [EmailAddress]
         public string Email { get; set; } = "";
 
         [Required]

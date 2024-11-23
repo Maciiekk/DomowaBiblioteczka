@@ -7,7 +7,9 @@
             None,
             Edit,
             RolesChange,
-            Delete
+            Delete,
+            Cancel,
+            ChangeMode
         }
     }
 }

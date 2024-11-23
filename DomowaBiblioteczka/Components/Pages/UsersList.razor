@@ -3,8 +3,9 @@
 @using Microsoft.AspNetCore.Authorization
 @using static DomowaBiblioteczka.Globals
 
-@inject IUsersService usersService
+@inject DialogService DialogService
 @inject NavigationManager Navigation
+@inject IUsersService usersService
 
 @attribute [Authorize (Roles = "Admin")]
 
@@ -14,6 +15,15 @@
 
 <PageTitle>List of users</PageTitle>
 
+@if (isLoading)
+{
+    <div class="rz-text-align-center">
+        <RadzenProgressBar Mode="ProgressBarMode.Indeterminate" />
+        <p>Loading data...</p>
+    </div>
+}
+else
+{
 <div class="rz-p-12 rz-text-align-center" style="width: 100%;">
     <RadzenDataGrid 
         Data="users"
@@ -23,37 +33,64 @@
         AllowPaging="true" 
         PageSize="25" 
         PagerHorizontalAlign="HorizontalAlign.Left"
-        ShowPagingSummary="true">
+        ShowPagingSummary="true"
+        @ref=usersGrid>
         <Columns>
-            <RadzenDataGridColumn TItem="ApplicationUser" Property="UserName" Title="Name" Sortable="true" Filterable="true" />
-            <RadzenDataGridColumn TItem="ApplicationUser" Property="Email" Title="Email" Sortable="true" Filterable="true" />
+            <RadzenDataGridColumn TItem="ApplicationUser" Property="UserName" Title="Name" Sortable="true" Filterable="true" >
+                <EditTemplate Context="user">
+                    <RadzenTextBox @bind-Value="user.UserName"/>
+                </EditTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="ApplicationUser" Property="Email" Title="Email" Sortable="true" Filterable="true">
+                <EditTemplate Context="user">
+                    <RadzenTextBox @bind-Value="user.Email" />
+                </EditTemplate>
+                </RadzenDataGridColumn> 
             <RadzenDataGridColumn Title="Edit" Width="75px" MinWidth="50px">
                 <Template Context = "user" >
-                    <RadzenButton Icon="Edit" ButtonStyle="ButtonStyle.Primary" Click=@(args => OnClick(Operations.Edit,user.Id)) />
+                    <RadzenButton Icon="Edit" ButtonStyle="ButtonStyle.Primary" Click=@(args => OnClick(Operations.ChangeMode,user)) />
                 </Template>
+                <EditTemplate Context="user">
+                    <RadzenButton Icon="Check" ButtonStyle="ButtonStyle.Success" Click=@(args => OnClick(Operations.Edit,user)) />
+                </EditTemplate>
             </RadzenDataGridColumn>              
             <RadzenDataGridColumn Title="Roles" Width="75px" MinWidth="50px">
                 <Template Context = "user" >
-                    <RadzenButton Icon="License" ButtonStyle="ButtonStyle.Secondary" Click=@(args => OnClick(Operations.RolesChange,user.Id)) />
+                    <RadzenButton Icon="License" ButtonStyle="ButtonStyle.Secondary" Click=@(args => OnClick(Operations.RolesChange,user)) />
                 </Template>
+                <EditTemplate Context="user">
+                    <RadzenButton Icon="Close" ButtonStyle="ButtonStyle.Warning" Click=@(args => OnClick(Operations.Cancel,user)) />
+                </EditTemplate>
             </RadzenDataGridColumn>            
             <RadzenDataGridColumn Title="Del" Width="75px" MinWidth="50px">
                 <Template Context = "user">
-                    <RadzenButton Icon="Delete" ButtonStyle="ButtonStyle.Warning" Click=@(args => OnClick(Operations.Delete,user.Id)) />
+                    <RadzenButton Icon="Delete" ButtonStyle="ButtonStyle.Danger" Click=@(args => OnClick(Operations.Delete,user)) />
                 </Template>
             </RadzenDataGridColumn>
         </Columns>
     </RadzenDataGrid>
 </div>
 
-
+}
 @code 
-{
+{//TODO: add column with coma separated roles 
+
     private IEnumerable<ApplicationUser> users;
+
+
+    private RadzenDataGrid<ApplicationUser> usersGrid;
+    private DataGridEditMode editMode = DataGridEditMode.Single;
+    private ApplicationUser originalUser;
+
+    private bool isLoading = true;
 
     protected override async Task OnInitializedAsync()
     {
+        isLoading = true;
+
         await InitializeData();
+
+        isLoading = false;
 
         await base.OnInitializedAsync();
     }
@@ -63,22 +100,48 @@
         users = await usersService.SelectAll();
     }
 
-    private void OnClick(Operations operationType, string id)
+    private async Task OnClick(Operations operationType, ApplicationUser user)
     {
         if (operationType == Operations.Edit)
         {
-            // TODO: implement in line edition
-            throw new NotImplementedException();
+            //TODO: Implement UI side validation
+
+            await usersService.UpdateUser(user);
+
+            await usersGrid.UpdateRow(user);
+            //TODO: Implement pop up about succeded operation or fail 
         }
+
         if (operationType == Operations.RolesChange)
         {
-            Navigation.NavigateTo($"/UserRoleEdition/{id}");
+            Navigation.NavigateTo($"/UserRoleEdition/{user.Id}");
         }
-        
+
+        if (operationType == Operations.Cancel)
+        {
+            usersGrid.CancelEditRow(user);
+        }                
+
+        if (operationType == Operations.ChangeMode)
+        {
+            originalUser = user;
+
+            await usersGrid.EditRow(user);
+        }          
+
         if (operationType == Operations.Delete)
         {
-            // TODO: implement Confirmation before delete
-            throw new NotImplementedException();
+            var result = await DialogService.Confirm(
+           "Are you sure?",
+           $"Delete user {user.UserName}",
+           new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" }
+       );
+            if(result == true)
+            {           
+                await usersService.DeleteUser(user.Id);
+
+                await InitializeData();
+            }
         }        
     }
 }

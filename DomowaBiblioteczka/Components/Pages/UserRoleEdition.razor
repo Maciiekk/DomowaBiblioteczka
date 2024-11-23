@@ -1,8 +1,15 @@
 ﻿@using DomowaBiblioteczka.Data
+@using DomowaBiblioteczka.Services.Roles
 @using DomowaBiblioteczka.Services.Users
+
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
 
 @inject IUsersService usersService
+@inject IRolesService rolesService
+@inject NavigationManager Navigation
+
+
 
 @attribute [Authorize(Roles = "Admin")]
 
@@ -10,14 +17,34 @@
 
 @page "/UserRoleEdition/{id}"
 
+@if (isLoading)
+{
+    <div class="rz-text-align-center">
+        <RadzenProgressBar Mode="ProgressBarMode.Indeterminate" />
+        <p>Loading data...</p>
+    </div>
+}
+else
+{
+    
 <PageTitle>Users Edition</PageTitle>
 
-
-
 <div class="rz-p-12 rz-text-align-center">
+    <h1>@(user)'s Roles:'</h1>
 
+        <RadzenCheckBoxList @bind-Value=@(usersRoles) TValue="string" Orientation="Orientation.Vertical">
+        <Items>
+            @foreach (IdentityRole role in allRoles)
+            {
+                <RadzenCheckBoxListItem Text="@(role.Name)" Value="@(role.Name)" />           
+            }
+        </Items>
+    </RadzenCheckBoxList>
+
+    <RadzenButton Text="Update" Click="@(args => OnClick())"/>
 
 </div>
+}
 
 @code
 {
@@ -25,18 +52,33 @@
     public string id { get; set; }
 
     private ApplicationUser user;
+    private IEnumerable<IdentityRole> allRoles;
+    private IEnumerable<string> usersRoles;
+
+    private bool isLoading = true;
 
     protected override async Task OnInitializedAsync()
     {
+        isLoading = true;
         // Fetch the user data based on the ID
         await InitializeData();
 
+        isLoading = false;
         await base.OnInitializedAsync();
     }
 
     private async Task InitializeData()
     {
         user = await usersService.SelectById(id);
+        allRoles = await rolesService.SelectAllRoles();
+        usersRoles = await usersService.SelectAllRolesByUser(user.Id);
+    }
+    private async Task OnClick()
+    {
+        await usersService.UpdateRoles(id, usersRoles.ToList());
+
+        Navigation.NavigateTo($"/UsersList");
+
     }
 
-}
+ }

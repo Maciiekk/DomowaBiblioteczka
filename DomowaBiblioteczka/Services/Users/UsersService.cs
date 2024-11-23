@@ -40,6 +40,10 @@ namespace DomowaBiblioteczka.Services.Users
 
         public async Task<bool> UpdateRoles(string id, List<string> roles)
             => await UpdateRolesAsyncCallback(id, roles);
+
+        public async Task<IEnumerable<string>> SelectAllRolesByUser(string id)
+            => await SelectAllRolesByUserAsyncCallback(id);
+
         private async Task<IEnumerable<ApplicationUser>> SelectAllAsyncCallback( )
         {
                 return await _userManager.Users.ToListAsync();
@@ -48,6 +52,16 @@ namespace DomowaBiblioteczka.Services.Users
         private async Task<ApplicationUser> SelectByIdAsyncCallback(string id)
         {
                 return await _userManager.FindByIdAsync(id);
+        }        
+        
+        
+        private async Task<IEnumerable<string>> SelectAllRolesByUserAsyncCallback(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            // TODO: add some conditions
+            var roles = await _userManager.GetRolesAsync(user);
+            
+            return roles.AsEnumerable();
         }
 
         private async Task<bool> UpdateRolesAsyncCallback(string id, List<string> updatedRoles)
@@ -61,7 +75,7 @@ namespace DomowaBiblioteczka.Services.Users
                 {
                     return false;
                 }
-                
+
                 var roles = await _userManager.GetRolesAsync(user);
 
                 var rolesToAdd = updatedRoles.Except(roles).ToList();
@@ -74,7 +88,7 @@ namespace DomowaBiblioteczka.Services.Users
                     succeeded = succeeded && removeResult.IsCompletedSuccessfully;
                 }
 
-                if (rolesToRemove.Any())
+                if (rolesToAdd.Any())
                 {
                     var addResult = _userManager.AddToRolesAsync(user, rolesToAdd);
                     succeeded = succeeded && addResult.IsCompletedSuccessfully;

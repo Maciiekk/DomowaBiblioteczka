@@ -1,4 +1,5 @@
 ﻿using DomowaBiblioteczka.Data;
+using Microsoft.AspNetCore.Identity;
 
 namespace DomowaBiblioteczka.Services.Users
 {
@@ -17,5 +18,6 @@ namespace DomowaBiblioteczka.Services.Users
         public Task<bool> CreateUser(ApplicationUser updatedUser, string password);
 
         public Task<bool> UpdateRoles(string id, List<string> roles);
+        public Task<IEnumerable<string>> SelectAllRolesByUser(string id);
     }
 }
