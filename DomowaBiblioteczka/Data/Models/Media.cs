@@ -14,7 +14,7 @@
 
         public DateTime ReleseDate { get; set;} 
 
-        public int TimeOrPages { get; set; }
+        public int Length { get; set; }
         
         public ICollection<MediaSection> Sections { get; set; }
 
@@ -23,6 +23,10 @@
         public ICollection<Author> Authors { get; set; }
         public int MediaTypeID { get; set; }
         public MediaType MediaType { get; set; }
+
+        public int IndustryID { get; set; }
+
+        public Industry Industry { get; set; }
 
         //TODO: image ID
     }

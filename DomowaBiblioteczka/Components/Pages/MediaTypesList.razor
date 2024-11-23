@@ -1,11 +1,13 @@
 ﻿@using DomowaBiblioteczka.Data.Models
 @using DomowaBiblioteczka.Services.MediaTypes
+@using DomowaBiblioteczka.Services.Units
 @using Microsoft.AspNetCore.Authorization
 @using static DomowaBiblioteczka.Globals
 
 
 @inject DialogService DialogService
 @inject IMediaTypesService mediaTypeService
+@inject IUnitsService unitService
 
 @attribute [Authorize(Roles = "Admin")]
 
@@ -44,6 +46,13 @@ else
                         <RadzenTextBox @bind-Value="MediaType.Name" MaxLength="100" Style="width: 100%" />
                     </EditTemplate>
                 </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn TItem="MediaType" Property="Unit.Name" Title="Unit" Sortable="true" Filterable="true">
+                    <EditTemplate Context="MediaType">
+                        <RadzenDropDown @bind-Value="MediaType.UnitId" Data="@unitList" TextProperty="Name" ValueProperty="Id" Style="width:100%; display: block;" />
+                    </EditTemplate>
+                </RadzenDataGridColumn>
+
                 <RadzenDataGridColumn Title="Edit" Width="100px" MinWidth="100px">
                     <Template Context="MediaType">
                         <RadzenButton Icon="Edit" ButtonStyle="ButtonStyle.Primary" Click=@(args => OnClick(Operations.ChangeMode,MediaType)) />
@@ -67,8 +76,10 @@ else
 {
     //TODO: add column with coma separated roles
     private IEnumerable<MediaType> mediaTypesList;
+    private IEnumerable<Unit> unitList;
 
     private RadzenDataGrid<MediaType> mediaTypesGrid;
+
 
     private DataGridEditMode editMode = DataGridEditMode.Single;
     private MediaType originalMediaType;
@@ -90,6 +101,7 @@ else
     private async Task InitializeData()
     {
         mediaTypesList = await mediaTypeService.GetAllAsync();
+        unitList = await unitService.GetAllAsync();
 
     }
 

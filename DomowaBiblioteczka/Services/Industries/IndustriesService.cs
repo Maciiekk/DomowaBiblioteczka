@@ -19,7 +19,7 @@ namespace DomowaBiblioteczka.Services.Industries
 
         private async Task<IEnumerable<Industry>> GetAllAsyncCallback()
         {
-            return await _context.Industries.Include(i=>i.IndustryType).ToListAsync();
+            return await _context.Industries.Include(i => i.IndustryType).ToListAsync();
         }
 
     }

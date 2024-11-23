@@ -10,6 +10,7 @@ using DomowaBiblioteczka.Services.Medias;
 using DomowaBiblioteczka.Services.MediaSections;
 using DomowaBiblioteczka.Services.MediaTypes;
 using DomowaBiblioteczka.Services.Roles;
+using DomowaBiblioteczka.Services.Units;
 using DomowaBiblioteczka.Services.Users;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -41,6 +42,7 @@ builder.Services.AddScoped<IMediasService, MediasService>();
 builder.Services.AddScoped<IMediaTypesService, MediaTypesService>();
 builder.Services.AddScoped<IIndustryTypesService, IndustryTypesService>();
 builder.Services.AddScoped<IIndustriesService, IndustriesService>();
+builder.Services.AddScoped<IUnitsService, UnitsService>();
 
 
 builder.Services.AddRadzenComponents();

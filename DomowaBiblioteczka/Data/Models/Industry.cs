@@ -11,5 +11,7 @@
         public int IndustryTypeId { get; set; }
 
         public IndustryType IndustryType { get; set; }
+
+        public ICollection<Media> Medias { get; set; }
     }
 }

@@ -10,14 +10,28 @@ namespace DomowaBiblioteczka.Data.Seeder
             if(context == null) 
                 throw new ArgumentNullException("missing_context");
 
-            if(!await context.MediaTypes.AnyAsync())
+            // Seed Units
+            if (!context.Units.Any())
             {
+                context.Units.AddRange(
+                    new Unit { Name = "pages", Symbole = "page" },
+                    new Unit { Name = "minutes", Symbole = "min" },
+                    new Unit { Name = "seconds", Symbole = "s" }
+
+                );
+                await context.SaveChangesAsync();
+            }
+
+            if (!await context.MediaTypes.AnyAsync())
+            {
+                IEnumerable<Unit> units = context.Units;
+
                await context.MediaTypes.AddRangeAsync(
-               new MediaType { Name = "book" },
-               new MediaType { Name = "movie" },
-               new MediaType { Name = "music album" },
-               new MediaType { Name = "comics" },
-               new MediaType { Name = "magazine" }
+               new MediaType { Name = "book", UnitId = units.First(u=>u.Id == 1).Id},
+               new MediaType { Name = "movie", UnitId = units.First(u => u.Id == 2).Id },
+               new MediaType { Name = "music album", UnitId = units.First(u => u.Id == 2).Id },
+               new MediaType { Name = "comics", UnitId = units.First(u => u.Id == 1).Id },
+               new MediaType { Name = "magazine", UnitId = units.First(u => u.Id == 1).Id }
                 );
                 context.SaveChanges();
 
@@ -70,13 +84,16 @@ namespace DomowaBiblioteczka.Data.Seeder
                 await context.SaveChangesAsync();
             }
 
+
+
             // Seed Media
             if (!context.Medias.Any())
             {
                 var mediaType = context.MediaTypes.FirstOrDefault();
                 var author = context.Authors.FirstOrDefault();
+                var industry = context.Industries.FirstOrDefault();
 
-                if (mediaType != null && author != null)
+                if (mediaType != null && author != null && industry != null)
                 {
                     context.Medias.AddRange(
                         new Media
@@ -87,7 +104,8 @@ namespace DomowaBiblioteczka.Data.Seeder
                             ReleseDate = DateTime.UtcNow.AddYears(-2),
                             MediaTypeID = mediaType.Id,
                             Authors = new List<Author> { author },
-                            TimeOrPages = 350,
+                            Length = 350,
+                            IndustryID = industry.Id,
                         },
                         new Media
                         {
@@ -97,7 +115,8 @@ namespace DomowaBiblioteczka.Data.Seeder
                             ReleseDate = DateTime.UtcNow.AddYears(-1),
                             MediaTypeID = mediaType.Id,
                             Authors = new List<Author> { author },
-                            TimeOrPages = 320,
+                            Length = 320,
+                            IndustryID = industry.Id
                         }
                         );
                 await context.SaveChangesAsync();
@@ -150,6 +169,8 @@ namespace DomowaBiblioteczka.Data.Seeder
             }
 
             await context.SaveChangesAsync();
+
+
 
         }
     }

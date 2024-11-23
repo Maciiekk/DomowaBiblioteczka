@@ -13,6 +13,7 @@ namespace DomowaBiblioteczka.Data
         public DbSet<MediaSection> MediaSections { get; set; }
         public DbSet<KeyWord> KeyWords { get; set; }
         public DbSet<IndustryType> IndustryTypes { get; set; }
+        public DbSet<Unit> Units { get; set; }
         public MediaDbContext(DbContextOptions<MediaDbContext> options)
     : base(options)
         {
@@ -34,6 +35,20 @@ namespace DomowaBiblioteczka.Data
                 .HasForeignKey(i => i.IndustryTypeId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // Industry and Media: One-to-Many
+            modelBuilder.Entity<Industry>()
+                .HasMany(i=>i.Medias)
+                .WithOne(i => i.Industry)
+                .HasForeignKey(ms => ms.IndustryID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Industry and Media: One-to-Many
+            modelBuilder.Entity<Unit>()
+                .HasMany(u => u.MediaTypes)
+                .WithOne(m => m.Unit )
+                .HasForeignKey(ms => ms.UnitId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             // Media and MediaSection: One-to-Many
             modelBuilder.Entity<Media>()
                 .HasMany(m => m.Sections)
@@ -41,11 +56,11 @@ namespace DomowaBiblioteczka.Data
                 .HasForeignKey(ms => ms.MediaId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Media and KeyWord: Many-to-Many
+
             modelBuilder.Entity<Media>()
                 .HasMany(m => m.Keywords)
                 .WithMany(k => k.Medias)
-                .UsingEntity(j => j.ToTable("MediaKeywords")); // Optional join table name           
+                .UsingEntity(j => j.ToTable("MediaKeywords")); // Optional join table name                   
             
             // Media and Author: Many-to-Many
             modelBuilder.Entity<Media>()
@@ -113,6 +128,16 @@ namespace DomowaBiblioteczka.Data
             modelBuilder.Entity<IndustryType>()
                 .Property(it => it.Name)
                 .HasMaxLength(200)
+                .IsRequired();
+
+            modelBuilder.Entity<Unit>()
+                .Property(u => u.Name)
+                .HasMaxLength(50)
+                .IsRequired();            
+            
+            modelBuilder.Entity<Unit>()
+                .Property(u => u.Symbole)
+                .HasMaxLength(10)
                 .IsRequired();
         }
     }
