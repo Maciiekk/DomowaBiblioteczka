@@ -34,6 +34,11 @@
                     <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> Industries
                 </NavLink>
             </AuthorizeView>
+            <AuthorizeView Roles="User,Admin">
+                <NavLink class="nav-link" href="/MediasList" Match="NavLinkMatch.All">
+                    <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> Medias
+                </NavLink>
+            </AuthorizeView>
         </div>
     </nav>
 </div>
