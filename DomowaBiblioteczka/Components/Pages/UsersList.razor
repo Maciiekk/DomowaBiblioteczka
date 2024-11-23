@@ -133,7 +133,7 @@ else
         {
             var result = await DialogService.Confirm(
            "Are you sure?",
-           $"Delete user {user.UserName}",
+           $"Delete: {user.UserName}",
            new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" }
        );
             if(result == true)

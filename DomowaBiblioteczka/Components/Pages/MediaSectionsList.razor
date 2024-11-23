@@ -1,0 +1,166 @@
+﻿@using DomowaBiblioteczka.Data
+@using DomowaBiblioteczka.Data.Models
+@using DomowaBiblioteczka.Services.MediaSections
+@using DomowaBiblioteczka.Services.Medias
+@using Microsoft.AspNetCore.Authorization
+@using static DomowaBiblioteczka.Globals
+
+@inject DialogService DialogService
+@inject IMediaSectionsService mediaSectionsService
+@inject IMediasService mediaService
+
+@attribute [Authorize(Roles = "Admin")]
+
+@rendermode InteractiveServer
+
+@page "/MediaSectionList"
+
+<PageTitle>List of Media Sections</PageTitle>
+
+@if (isLoading)
+{
+    <div class="rz-text-align-center">
+        <RadzenProgressBar Mode="ProgressBarMode.Indeterminate" />
+        <p>Loading data...</p>
+    </div>
+}
+else
+{
+    <div class="rz-p-12 rz-text-align-center" style="width: 100%;">
+        <RadzenDataGrid Data="mediaSectionsList"
+                        AllowFiltering="true"
+                        FilterMode="FilterMode.Simple"
+                        AllowSorting="true"
+                        AllowPaging="true"
+                        PageSize="25"
+                        PagerHorizontalAlign="HorizontalAlign.Left"
+                        ShowPagingSummary="true"
+                        @ref=mediaSectionsGrid>
+
+            <HeaderTemplate>
+                <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle" Text="Add New Order" Click="@InsertRow" Disabled="@(editing)" />
+            </HeaderTemplate>
+            <Columns>
+                <RadzenDataGridColumn TItem="MediaSection" Property="Name" Title="Name" Sortable="true" Filterable="true">
+                    <EditTemplate Context="mediaSection">
+                        <RadzenTextBox @bind-Value="mediaSection.Name" MaxLength="200" Style="width: 100%" />
+                    </EditTemplate>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="MediaSection" Property="Position" Title="No" Sortable="true" Filterable="true">
+                    <EditTemplate Context="mediaSection">
+                        <RadzenNumeric Min="1" @bind-Value=@mediaSection.Position Style="width: 100%" />
+                    </EditTemplate>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="MediaSection" Property="Media.Title" Title="Related Media" Sortable="true" Filterable="true">
+                    <EditTemplate Context="mediaSection">
+                        <RadzenDropDown @bind-Value="mediaSection.MediaId" Data="@mediaList" TextProperty="Title" ValueProperty="Id" Style="width:100%; display: block;" />
+                    </EditTemplate>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Title="Edit" Width="100px" MinWidth="100px">
+                    <Template Context="mediaSection">
+                        <RadzenButton Icon="Edit" ButtonStyle="ButtonStyle.Primary" Click=@(args => OnClick(Operations.ChangeMode,mediaSection)) />
+                    </Template>
+                    <EditTemplate Context="mediaSection">
+                        <RadzenButton Icon="Check" ButtonStyle="ButtonStyle.Success" Click=@(args => OnClick(Operations.Edit,mediaSection)) />
+                        <RadzenButton Icon="Close" ButtonStyle="ButtonStyle.Warning" Click=@(args => OnClick(Operations.Cancel,mediaSection)) />
+                    </EditTemplate>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Title="Del" Width="75px" MinWidth="50px">
+                    <Template Context="mediaSection">
+                        <RadzenButton Icon="Delete" ButtonStyle="ButtonStyle.Danger" Click=@(args => OnClick(Operations.Delete,mediaSection)) />
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
+    </div>
+
+
+}
+
+    @code
+{
+    //TODO: add column with coma separated roles
+
+    private IEnumerable<MediaSection> mediaSectionsList;
+    private IEnumerable<Media> mediaList;
+
+    private RadzenDataGrid<MediaSection> mediaSectionsGrid;
+    private DataGridEditMode editMode = DataGridEditMode.Single;
+    private MediaSection originalMediaSection;
+
+    private bool isLoading = true;
+    private bool editing = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+
+        await InitializeData();
+
+        isLoading = false;
+
+        await base.OnInitializedAsync();
+    }
+
+    private async Task InitializeData()
+    {
+        mediaSectionsList = await mediaSectionsService.GetAllAsync();
+        mediaList = await mediaService.GetAllAsync();
+    }
+
+    async Task InsertRow()
+    {
+        var order = new MediaSection();
+        await mediaSectionsGrid.InsertRow(order);
+    }
+
+    private async Task OnClick(Operations operationType, MediaSection mediaSection)
+    {
+        if (operationType == Operations.Edit)
+        {
+            //TODO: Implement UI side validation
+
+            if (mediaSectionsList.Any(a => a.Id.Equals(mediaSection.Id)))
+            {
+                await mediaSectionsService.UpdateAsync(mediaSection);
+            }
+            else
+            {
+                await mediaSectionsService.AddAsync(mediaSection);
+                await InitializeData();
+            }
+            await mediaSectionsGrid.UpdateRow(mediaSection);
+            //TODO: Implement pop up about succeded operation or fail
+        }
+
+        if (operationType == Operations.Cancel)
+        {
+            mediaSectionsGrid.CancelEditRow(originalMediaSection);
+            await InitializeData();
+            editing = false;
+        }
+
+        if (operationType == Operations.ChangeMode)
+        {
+            originalMediaSection = mediaSection;
+            editing = true;
+            await mediaSectionsGrid.EditRow(mediaSection);
+
+        }
+
+        if (operationType == Operations.Delete)
+        {
+            var result = await DialogService.Confirm(
+           "Are you sure?",
+           $"Delete: {mediaSection.Media.Title}:{mediaSection.Name} ",
+           new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" }
+       );
+            if (result == true)
+            {
+                await mediaSectionsService.DeleteAsync(mediaSection.Id);
+
+                await InitializeData();
+            }
+        }
+    }
+}
