@@ -1,12 +1,18 @@
 ﻿@using DomowaBiblioteczka.Data
 @using DomowaBiblioteczka.Data.Models
+@using DomowaBiblioteczka.Services.Industries
+@using DomowaBiblioteczka.Services.MediaTypes
 @using DomowaBiblioteczka.Services.Medias
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore.Metadata.Internal
 @using static DomowaBiblioteczka.Globals
 
 
 @inject DialogService DialogService
 @inject IMediasService mediaService
+@inject IMediaTypesService mediaTypesService
+@inject IIndustriesService industryService
+@inject NavigationManager Navigation
 
 @attribute [Authorize(Roles = "User,Admin")]
 
@@ -24,7 +30,7 @@
     </div>
 }
 else
-{@*
+{
     <div class="rz-p-12 rz-text-align-center" style="width: 100%;">
         <RadzenDataGrid Data="mediaList"
                         AllowFiltering="true"
@@ -34,49 +40,93 @@ else
                         PageSize="25"
                         PagerHorizontalAlign="HorizontalAlign.Left"
                         ShowPagingSummary="true"
-                        @ref=mediaGrid>
-
-            <HeaderTemplate>
-                <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle" Text="Add New Order" Click="@InsertRow" Disabled="@(editing)" />
-            </HeaderTemplate>
+                        @ref=mediaGrid>   
+                        <HeaderTemplate>
+                        <AuthorizeView Roles="Admin" > 
+                            <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle" Text="Add New Order" Click="@InsertRow" Disabled="@(editing)" />
+                         </AuthorizeView>    
+                        </HeaderTemplate>
             <Columns>
-                <RadzenDataGridColumn TItem="MediaSection" Property="Name" Title="Name" Sortable="true" Filterable="true">
-                    <EditTemplate Context="mediaSection">
-                        <RadzenTextBox @bind-Value="mediaSection.Name" MaxLength="200" Style="width: 100%" />
+                <RadzenDataGridColumn TItem="Media" Property="Title" Title="Title" Sortable="true" Filterable="true">
+                    <EditTemplate Context="media">
+                        <RadzenTextBox @bind-Value="media.Title" MaxLength="200" Style="width: 100%" />
                     </EditTemplate>
                 </RadzenDataGridColumn>
-                <RadzenDataGridColumn TItem="MediaSection" Property="Position" Title="No" Sortable="true" Filterable="true">
-                    <EditTemplate Context="mediaSection">
-                        <RadzenNumeric Min="1" @bind-Value=@mediaSection.Position Style="width: 100%" />
+                <RadzenDataGridColumn TItem="Media" Property="Description" Title="Description" Sortable="false" Filterable="true">
+                    <EditTemplate Context="media">
+                        <RadzenTextArea @bind-Value="media.Description" MaxLength="1000" Style="width: 100%" />
                     </EditTemplate>
                 </RadzenDataGridColumn>
-                <RadzenDataGridColumn TItem="MediaSection" Property="Media.Title" Title="Related Media" Sortable="true" Filterable="true">
-                    <EditTemplate Context="mediaSection">
-                        <RadzenDropDown @bind-Value="mediaSection.MediaId" Data="@mediaList" TextProperty="Title" ValueProperty="Id" Style="width:100%; display: block;" />
+
+
+                <RadzenDataGridColumn TItem="Media" Property="MediaType.Name" Title="Type" Sortable="true" Filterable="true">
+                    <EditTemplate Context="media">
+                        <RadzenDropDown @bind-Value="media.MediaTypeID" Data="@mediaTypesList" TextProperty="Name" ValueProperty="Id" Style="width:100%; display: block;" />
                     </EditTemplate>
                 </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn TItem="Media" Property="Length" Title="No" Sortable="true" Filterable="true">
+                    <EditTemplate Context="media">
+                        <RadzenNumeric Min="1" @bind-Value=@media.Length Style="width: 100%" />
+                    </EditTemplate>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Media" Property="MediaType.Unit.Symbole" Title="unit" Sortable="true" Filterable="true" />
+
+
+                <RadzenDataGridColumn TItem="Media" Property="Industry.Name" Title="Industry" Sortable="true" Filterable="true">
+                    <EditTemplate Context="media">
+                        <RadzenDropDown @bind-Value="media.IndustryID" Data="@industryList" TextProperty="Name" ValueProperty="Id" Style="width:100%; display: block;" />
+                    </EditTemplate>
+                </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn TItem="Media" Property="CreatedDate" Title="Added At" Sortable="true" Filterable="false">
+                    <EditTemplate Context="media">
+                        <RadzenDatePicker @bind-Value="media.CreatedDate" Style="width:100%" />
+                    </EditTemplate>
+                </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn TItem="Media" Property="ReleseDate" Title="Released At" Sortable="true" Filterable="false">
+                    <EditTemplate Context="media">
+                        <RadzenDatePicker @bind-Value="media.ReleseDate" Style="width:100%" />
+                    </EditTemplate>
+                </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn TItem="Media" Property="UpdatedDate" Title="Last Update" Sortable="true" Filterable="false"/>
+
                 <RadzenDataGridColumn Title="Edit" Width="100px" MinWidth="100px">
-                    <Template Context="mediaSection">
-                        <RadzenButton Icon="Edit" ButtonStyle="ButtonStyle.Primary" Click=@(args => OnClick(Operations.ChangeMode,mediaSection)) />
+                    <Template Context="media">
+                        <RadzenButton Icon="Edit" ButtonStyle="ButtonStyle.Primary" Click=@(args => OnClick(Operations.ChangeMode,media)) />
                     </Template>
-                    <EditTemplate Context="mediaSection">
-                        <RadzenButton Icon="Check" ButtonStyle="ButtonStyle.Success" Click=@(args => OnClick(Operations.Edit,mediaSection)) />
-                        <RadzenButton Icon="Close" ButtonStyle="ButtonStyle.Warning" Click=@(args => OnClick(Operations.Cancel,mediaSection)) />
+                    <EditTemplate Context="media">
+                        <RadzenButton Icon="Check" ButtonStyle="ButtonStyle.Success" Click=@(args => OnClick(Operations.Edit,media)) />
+                        
+                    </EditTemplate>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Title="Details" Width="75px" MinWidth="50px">
+                    <Template Context="media">
+                        <RadzenButton Icon="License" ButtonStyle="ButtonStyle.Secondary" Click=@(args => OnClick(Operations.RolesChange,media)) />
+                    </Template>
+                    <EditTemplate Context="media">
+                        <RadzenButton Icon="Close" ButtonStyle="ButtonStyle.Warning" Click=@(args => OnClick(Operations.Cancel,media)) />
                     </EditTemplate>
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn Title="Del" Width="75px" MinWidth="50px">
-                    <Template Context="mediaSection">
-                        <RadzenButton Icon="Delete" ButtonStyle="ButtonStyle.Danger" Click=@(args => OnClick(Operations.Delete,mediaSection)) />
+                    <Template Context="media">
+                        <RadzenButton Icon="Delete" ButtonStyle="ButtonStyle.Danger" Click=@(args => OnClick(Operations.Delete,media)) />
                     </Template>
                 </RadzenDataGridColumn>
             </Columns>
         </RadzenDataGrid>
-    </div>*@
+    </div>
 }
 
 @code
 {
+    //TODO: Realise before Added (dates validation)
+    //TODO: find way to dynamicly change column name
     private IEnumerable<Media> mediaList;
+    private IEnumerable<MediaType> mediaTypesList;
+    private IEnumerable<Industry> industryList;
 
     private RadzenDataGrid<Media> mediaGrid;
     private DataGridEditMode editMode = DataGridEditMode.Single;
@@ -99,6 +149,9 @@ else
     private async Task InitializeData()
     {
         mediaList = await mediaService.GetAllAsync();
+        mediaTypesList = await mediaTypesService.GetAllAsync();
+        industryList = await industryService.GetAllAsync();
+
     }
 
     async Task InsertRow()
@@ -108,7 +161,9 @@ else
     }
 
     private async Task OnClick(Operations operationType, Media media)
-    {
+    { 
+        media.UpdatedDate = DateTime.Now;
+
         if (operationType == Operations.Edit)
         {
             //TODO: Implement UI side validation
@@ -140,6 +195,11 @@ else
             editing = true;
             await mediaGrid.EditRow(media);
 
+        }
+
+        if (operationType == Operations.RolesChange)
+        {
+            Navigation.NavigateTo($"/MediaDetails/{media.Id}");
         }
 
         if (operationType == Operations.Delete)

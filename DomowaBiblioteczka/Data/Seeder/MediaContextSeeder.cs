@@ -14,7 +14,7 @@ namespace DomowaBiblioteczka.Data.Seeder
             if (!context.Units.Any())
             {
                 context.Units.AddRange(
-                    new Unit { Name = "pages", Symbole = "page" },
+                    new Unit { Name = "pages", Symbole = "pages" },
                     new Unit { Name = "minutes", Symbole = "min" },
                     new Unit { Name = "seconds", Symbole = "s" }
 
