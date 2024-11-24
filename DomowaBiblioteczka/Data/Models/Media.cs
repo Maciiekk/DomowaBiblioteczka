@@ -15,7 +15,9 @@
         public DateTime ReleseDate { get; set;} 
 
         public int Length { get; set; }
-        
+
+        public byte[]? Image { get; set; }
+
         public ICollection<MediaSection> Sections { get; set; }
 
         public ICollection<KeyWord> Keywords { get; set; }

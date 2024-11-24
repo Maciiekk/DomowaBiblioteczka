@@ -92,6 +92,9 @@ namespace DomowaBiblioteczka.Data
                 .HasMaxLength(200)
                 .IsRequired();
 
+            modelBuilder.Entity<Media>()
+                .Property(m => m.Image);
+
             // Industry: Additional Configuration
             modelBuilder.Entity<Industry>()
                 .Property(i => i.Name)

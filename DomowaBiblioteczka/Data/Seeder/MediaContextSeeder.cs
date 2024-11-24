@@ -84,8 +84,6 @@ namespace DomowaBiblioteczka.Data.Seeder
                 await context.SaveChangesAsync();
             }
 
-
-
             // Seed Media
             if (!context.Medias.Any())
             {
@@ -106,6 +104,7 @@ namespace DomowaBiblioteczka.Data.Seeder
                             Authors = new List<Author> { author },
                             Length = 350,
                             IndustryID = industry.Id,
+                            Image = File.ReadAllBytes(Path.Combine(Directory.GetCurrentDirectory(), @"Data\Seeder\zzimg1.png"))
                         },
                         new Media
                         {
@@ -116,7 +115,10 @@ namespace DomowaBiblioteczka.Data.Seeder
                             MediaTypeID = mediaType.Id,
                             Authors = new List<Author> { author },
                             Length = 320,
-                            IndustryID = industry.Id
+                            IndustryID = industry.Id,
+                            Image = File.ReadAllBytes(Path.Combine(Directory.GetCurrentDirectory(), @"Data\Seeder\zzimg2.png"))
+
+
                         }
                         );
                 await context.SaveChangesAsync();
