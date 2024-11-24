@@ -93,6 +93,10 @@ namespace DomowaBiblioteczka.Data
                 .IsRequired();
 
             modelBuilder.Entity<Media>()
+                .Property(m => m.ISBN)
+                .HasMaxLength(20);
+
+            modelBuilder.Entity<Media>()
                 .Property(m => m.Image);
 
             // Industry: Additional Configuration

@@ -18,6 +18,8 @@
 
         public byte[]? Image { get; set; }
 
+        public string? ISBN { get; set; }
+
         public ICollection<MediaSection> Sections { get; set; }
 
         public ICollection<KeyWord> Keywords { get; set; }
@@ -30,6 +32,5 @@
 
         public Industry Industry { get; set; }
 
-        //TODO: image ID
     }
 }

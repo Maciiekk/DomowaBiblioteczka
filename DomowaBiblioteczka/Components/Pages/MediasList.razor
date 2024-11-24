@@ -52,6 +52,12 @@ else
                         <RadzenTextBox @bind-Value="media.Title" MaxLength="200" Style="width: 100%" />
                     </EditTemplate>
                 </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn TItem="Media" Property="ISBN" Title="ISBN" Sortable="true" Filterable="true">
+                    <EditTemplate Context="media">
+                        <RadzenTextBox @bind-Value="media.ISBN" MaxLength="20" Style="width: 100%" />
+                    </EditTemplate>
+                </RadzenDataGridColumn>
                 <RadzenDataGridColumn TItem="Media" Property="Description" Title="Description" Sortable="false" Filterable="true">
                     <EditTemplate Context="media">
                         <RadzenTextArea @bind-Value="media.Description" MaxLength="1000" Style="width: 100%" />
@@ -91,6 +97,13 @@ else
                     </EditTemplate>
                 </RadzenDataGridColumn>
 
+                <RadzenDataGridColumn Title="Details" Width="75px" MinWidth="50px">
+                    <Template Context="media">
+                        <RadzenButton Icon="License" ButtonStyle="ButtonStyle.Secondary" Click=@(args => OnClick(Operations.RolesChange,media)) />
+                    </Template>
+                </RadzenDataGridColumn>
+                <AuthorizeView Roles="Admin">
+
                 <RadzenDataGridColumn TItem="Media" Property="UpdatedDate" Title="Last Update" Sortable="true" Filterable="false"/>
 
                 <RadzenDataGridColumn Title="Edit" Width="100px" MinWidth="100px">
@@ -99,15 +112,8 @@ else
                     </Template>
                     <EditTemplate Context="media">
                         <RadzenButton Icon="Check" ButtonStyle="ButtonStyle.Success" Click=@(args => OnClick(Operations.Edit,media)) />
+                         <RadzenButton Icon="Close" ButtonStyle="ButtonStyle.Warning" Click=@(args => OnClick(Operations.Cancel,media)) />
                         
-                    </EditTemplate>
-                </RadzenDataGridColumn>
-                <RadzenDataGridColumn Title="Details" Width="75px" MinWidth="50px">
-                    <Template Context="media">
-                        <RadzenButton Icon="License" ButtonStyle="ButtonStyle.Secondary" Click=@(args => OnClick(Operations.RolesChange,media)) />
-                    </Template>
-                    <EditTemplate Context="media">
-                        <RadzenButton Icon="Close" ButtonStyle="ButtonStyle.Warning" Click=@(args => OnClick(Operations.Cancel,media)) />
                     </EditTemplate>
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn Title="Del" Width="75px" MinWidth="50px">
@@ -115,6 +121,7 @@ else
                         <RadzenButton Icon="Delete" ButtonStyle="ButtonStyle.Danger" Click=@(args => OnClick(Operations.Delete,media)) />
                     </Template>
                 </RadzenDataGridColumn>
+                </AuthorizeView>
             </Columns>
         </RadzenDataGrid>
     </div>

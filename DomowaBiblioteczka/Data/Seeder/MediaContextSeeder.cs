@@ -1,5 +1,6 @@
 ﻿using DomowaBiblioteczka.Data.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 
 namespace DomowaBiblioteczka.Data.Seeder
 {
@@ -84,14 +85,39 @@ namespace DomowaBiblioteczka.Data.Seeder
                 await context.SaveChangesAsync();
             }
 
+            // Seed KeyWords
+            if (!context.KeyWords.Any())
+            {
+                context.KeyWords.AddRange(
+                    new KeyWord { Word = "Programming" },
+                    new KeyWord { Word = "Adventure" }
+                );
+                await context.SaveChangesAsync();
+            }
+
+            var mediaForKeyword = context.Medias.Include(k => k.Keywords).FirstOrDefault();
+            var keyword = context.KeyWords.FirstOrDefault();
+
+            if ((mediaForKeyword != null && mediaForKeyword == null) && keyword != null)
+            {
+                mediaForKeyword.Keywords = new List<KeyWord> { keyword };
+            }
+            else
+            {
+                Console.WriteLine("MockDataError: keyword or media can be empty.");
+            }
+
+            await context.SaveChangesAsync();
+
             // Seed Media
             if (!context.Medias.Any())
             {
                 var mediaType = context.MediaTypes.FirstOrDefault();
                 var author = context.Authors.FirstOrDefault();
                 var industry = context.Industries.FirstOrDefault();
+                var  keyWord = context.KeyWords.ToList();
 
-                if (mediaType != null && author != null && industry != null)
+                if (mediaType != null && author != null && industry != null && keyWord != null)
                 {
                     context.Medias.AddRange(
                         new Media
@@ -104,7 +130,9 @@ namespace DomowaBiblioteczka.Data.Seeder
                             Authors = new List<Author> { author },
                             Length = 350,
                             IndustryID = industry.Id,
-                            Image = File.ReadAllBytes(Path.Combine(Directory.GetCurrentDirectory(), @"Data\Seeder\zzimg1.png"))
+                            Image = File.ReadAllBytes(Path.Combine(Directory.GetCurrentDirectory(), @"Data\Seeder\zzimg1.png")),
+                            Keywords = keyWord,
+                            ISBN = "978-3-16-148410-0"
                         },
                         new Media
                         {
@@ -116,8 +144,9 @@ namespace DomowaBiblioteczka.Data.Seeder
                             Authors = new List<Author> { author },
                             Length = 320,
                             IndustryID = industry.Id,
-                            Image = File.ReadAllBytes(Path.Combine(Directory.GetCurrentDirectory(), @"Data\Seeder\zzimg2.png"))
-
+                            Image = File.ReadAllBytes(Path.Combine(Directory.GetCurrentDirectory(), @"Data\Seeder\zzimg2.png")),
+                            Keywords = keyWord,
+                            ISBN = "978-1-86197-876-9"
 
                         }
                         );
@@ -147,32 +176,6 @@ namespace DomowaBiblioteczka.Data.Seeder
                     Console.WriteLine("MockDataError: Media can be empty.");
                 }
             }
-
-            // Seed KeyWords
-            if (!context.KeyWords.Any())
-            {
-                context.KeyWords.AddRange(
-                    new KeyWord { Word = "Programming" },
-                    new KeyWord { Word = "Adventure" }
-                );
-                await context.SaveChangesAsync();
-            }
-
-            var mediaForKeyword = context.Medias.Include(k=> k.Keywords).FirstOrDefault();
-            var keyword = context.KeyWords.FirstOrDefault();
-
-            if ((mediaForKeyword != null && mediaForKeyword == null )&& keyword != null)
-            {
-                mediaForKeyword.Keywords = new List<KeyWord> { keyword };
-            }
-            else
-            {
-                Console.WriteLine("MockDataError: keyword or media can be empty.");
-            }
-
-            await context.SaveChangesAsync();
-
-
 
         }
     }

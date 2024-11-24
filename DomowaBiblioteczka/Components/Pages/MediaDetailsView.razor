@@ -1,5 +1,9 @@
-﻿@using Microsoft.AspNetCore.Authorization
+﻿@using DomowaBiblioteczka.Data.Models
+@using DomowaBiblioteczka.Services.Medias
+@using Microsoft.AspNetCore.Authorization
 
+@inject DialogService DialogService
+@inject IMediasService mediaService
 
 @attribute [Authorize(Roles = "User,Admin")]
 
@@ -8,43 +12,116 @@
 @page "/MediaDetails/{id}"
 
 
-<div class="container">
-    <div class="row">
-        <!-- Top Row -->
-        <div class="col-4 border">
-            <!-- IMAGE -->
-            1
-        </div>
-        <div class="col-8 border">
-            <div class="row">
-                <div class="col-12 border">
-                    <!-- title etc -->
-                    2.1
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-12 border">
-                    <!--desc -->
-                    2.2
-                </div>
-            </div>
-        </div>
+@if (isLoading)
+{
+    <div class="rz-text-align-center">
+        <RadzenProgressBar Mode="ProgressBarMode.Indeterminate" />
+        <p>Loading data...</p>
     </div>
-    <div class="row">
-        <div class="col-4 border">
-            <!-- Cell 1 -->
-            1
-        </div>
-        <!-- Bottom Row -->
-        <div class="col-8 border">
-            <!-- Cell 3 -->
-            3
-        </div>
-    </div>
-</div>
+}
+else
+{
+    <div class="container">
+        <div class="row align-items-stretch">
+            <!-- Top Row -->
+            <div class="col-4  border ">
+                <RadzenStack AlignItems="AlignItems.Center" class="rz-mx-auto rz-my-12">
 
+                    <RadzenImage Path="@($"data:image/jpeg;base64,{Convert.ToBase64String(media.Image)}")" AlternateText="binary image" />
+
+                </RadzenStack>
+            </div>
+            <div class="col-8 d-flex flex-column  border">
+                <div class="row align-items-stretch">
+                    <div class="col-12 border">
+
+                        <div class="row align-items-stretch">
+                            <div class="col-6 d-flex flex-column border">
+                                <RadzenTextBox Value="@media.Title" Style=" width:100%;rz-h-auto"  />
+                            </div>
+                            <div class="col-6 d-flex flex-column border">
+                                <RadzenTextBox Value="@media.Industry.Name" Style=" width:100%;rz-h-auto" />
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row align-items-stretch">
+                    <div class="col-12 border">
+                        <div class="row align-items-stretch">
+                            <div class="col-6 border">
+
+                                <RadzenTextArea @bind-Value="media.Industry.Description" MaxLength="1000" Style="width: 100%;resize:none" />
+                            </div>
+                            <div class="col-6 border">
+                                <RadzenTextArea @bind-Value="media.Industry.Description" MaxLength="1000" Style="width: 100%;resize:none" />
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            
+            <div class="col-4 border">
+                <RadzenDataList TItem="Author" Data="media.Authors" PageSize="10" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true">
+                    <Template Context="author">
+                            <RadzenText>@author.Name</RadzenText>
+                    </Template>
+
+                </RadzenDataList>
+            </div>
+            <!-- Bottom Row -->
+            <div class="col-4 border">
+                <!-- ISBN, DATE REALISED, LENGTH UNIT, AUTHOR -->
+                <RadzenTextBox Name="ISBN" Value="@media.ISBN"/>
+                <RadzenDatePicker Name="Realise Date" @bind-Value="@media.ReleseDate"/>
+                <RadzenTextBox Name="Length" Value="@media.Length.ToString()" />
+                <RadzenTextBox Name="Unit" Value="@media.MediaType.Unit.Symbole"/>
+                
+            </div>
+            <div class="col-4 border">
+                <RadzenDataList TItem="KeyWord" Data="media.Keywords" PageSize="10" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true">
+                    <Template Context="keyWord">
+                        <RadzenText>@keyWord.Word</RadzenText>
+                    </Template>
+                </RadzenDataList>
+            </div>            
+        </div>
+    </div>
+}
 
 @code {
     [Parameter]
     public string id { get; set; }
+
+    private int convertedId;
+
+    Media media { get; set; }
+
+    private bool isLoading = true;
+    private bool editing = false;
+    public bool isAdmin = false;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        
+        if (Int32.TryParse(id, out convertedId))
+        {
+            await InitializeData(convertedId);
+
+            isLoading = false;
+        }
+
+            await base.OnInitializedAsync();
+    }
+
+    private async Task InitializeData(int id)
+    {
+        media = await mediaService.GetByIdAsync(id);
+
+    }
 }
