@@ -1,9 +1,13 @@
 ﻿@using DomowaBiblioteczka.Data.Models
+@using DomowaBiblioteczka.Services.Authors
+@using DomowaBiblioteczka.Services.KeyWords
 @using DomowaBiblioteczka.Services.Medias
 @using Microsoft.AspNetCore.Authorization
 
 @inject DialogService DialogService
 @inject IMediasService mediaService
+@inject IAuthorsService authorService
+@inject IKeyWordsService keywordService
 
 @attribute [Authorize(Roles = "User,Admin")]
 
@@ -96,6 +100,9 @@ else
     [Parameter]
     public string id { get; set; }
 
+    IEnumerable<Author> authors;
+    IEnumerable<KeyWord> keyWords;
+
     private int convertedId;
 
     Media media { get; set; }
@@ -108,7 +115,7 @@ else
     protected override async Task OnInitializedAsync()
     {
         isLoading = true;
-        
+
         if (Int32.TryParse(id, out convertedId))
         {
             await InitializeData(convertedId);
@@ -116,12 +123,13 @@ else
             isLoading = false;
         }
 
-            await base.OnInitializedAsync();
+        await base.OnInitializedAsync();
     }
 
     private async Task InitializeData(int id)
     {
         media = await mediaService.GetByIdAsync(id);
-
+        authors = await authorService.GetAllAsync();
+        keyWords = await keywordService.GetAllAsync();
     }
 }

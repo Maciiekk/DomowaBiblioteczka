@@ -30,8 +30,6 @@ builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 builder.Services.AddScoped<UserManager<ApplicationUser>>();
 
-
-
 // Data Services
 builder.Services.AddScoped<IUsersService, UsersService>();
 builder.Services.AddScoped<IRolesService, RolesService>();

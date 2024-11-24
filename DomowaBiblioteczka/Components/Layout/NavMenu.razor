@@ -36,7 +36,12 @@
             </AuthorizeView>
             <AuthorizeView Roles="User,Admin">
                 <NavLink class="nav-link" href="/MediasList" Match="NavLinkMatch.All">
-                    <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> Medias
+                    <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> Medias                
+                </NavLink>
+            </AuthorizeView>
+            <AuthorizeView>
+                <NavLink class="nav-link" href="/Account/Manage" Match="NavLinkMatch.All">
+                    <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> Profile
                 </NavLink>
             </AuthorizeView>
         </div>

@@ -53,7 +53,14 @@ else
                 <EditTemplate Context="user">
                     <RadzenButton Icon="Check" ButtonStyle="ButtonStyle.Success" Click=@(args => OnClick(Operations.Edit,user)) />
                 </EditTemplate>
-            </RadzenDataGridColumn>              
+            </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Title="Password" Width="75px" MinWidth="50px" Visible="@(editing)">
+                        <Template Context = "user" >
+                        </Template>
+                    <EditTemplate Context="user">
+                        <RadzenPassword @bind-Value=@password />
+                    </EditTemplate>
+                    </RadzenDataGridColumn>
             <RadzenDataGridColumn Title="Roles" Width="75px" MinWidth="50px">
                 <Template Context = "user" >
                     <RadzenButton Icon="License" ButtonStyle="ButtonStyle.Secondary" Click=@(args => OnClick(Operations.RolesChange,user)) />
@@ -73,7 +80,8 @@ else
 
 }
 @code 
-{//TODO: add column with coma separated roles 
+{
+    //TODO: add column with coma separated roles 
 
     private IEnumerable<ApplicationUser> users;
 
@@ -83,6 +91,8 @@ else
     private ApplicationUser originalUser;
 
     private bool isLoading = true;
+    private bool editing = false;
+    private string password = string.Empty ; // TODO: think about it
 
     protected override async Task OnInitializedAsync()
     {
@@ -108,7 +118,14 @@ else
 
             await usersService.UpdateUser(user);
 
+
+            if (!String.IsNullOrEmpty(password))
+                await usersService.SetUserPassword(user.Id, password);
+
             await usersGrid.UpdateRow(user);
+            
+            password = string.Empty; 
+            editing = false;
             //TODO: Implement pop up about succeded operation or fail 
         }
 
@@ -120,12 +137,14 @@ else
         if (operationType == Operations.Cancel)
         {
             usersGrid.CancelEditRow(user);
+            password = string.Empty;
+            editing = false;
         }                
 
         if (operationType == Operations.ChangeMode)
         {
             originalUser = user;
-
+            editing = true;
             await usersGrid.EditRow(user);
         }          
 

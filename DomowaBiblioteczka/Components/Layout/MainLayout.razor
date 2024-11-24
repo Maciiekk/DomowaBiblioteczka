@@ -14,23 +14,15 @@
             <AuthorizeView>
                 <Authorized>
                 <div class="top-row px-4">
-                    <RadzenProfileMenu>
-                        <Template>
-                            <RadzenGravatar Email="user@example.com">
-                            </RadzenGravatar>
-                        </Template>
-                        <ChildContent>
-                            <RadzenProfileMenuItem Text="Profile" Path="Account/Manage" Icon="person"></RadzenProfileMenuItem>
-                            <form action="Account/Logout" method="post">
-                                <AntiforgeryToken />
-                                <input type="hidden" name="ReturnUrl" value="@currentUrl" />
-                                <button type="submit" class="nav-link">
-                                    <RadzenProfileMenuItem Text="Logout" aria-hidden="true"> Icon="logout"></RadzenProfileMenuItem>
-                                </button>
-                            </form>
-                        </ChildContent>
-                    </RadzenProfileMenu>
-                    </div>
+
+                    <form action="Account/Logout" method="post">
+                        <AntiforgeryToken/>
+                        <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+                        <button type="submit" class="nav-link">
+                            Logout
+                        </button>
+                    </form>
+                </div>
                 </Authorized>
                 <NotAuthorized>
                     <div class="top-row px-4">
