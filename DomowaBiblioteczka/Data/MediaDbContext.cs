@@ -56,7 +56,7 @@ namespace DomowaBiblioteczka.Data
                 .HasForeignKey(ms => ms.MediaId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-
+            // Media and Keyword: Many-to-Many
             modelBuilder.Entity<Media>()
                 .HasMany(m => m.Keywords)
                 .WithMany(k => k.Medias)
