@@ -3,6 +3,7 @@
 @using DomowaBiblioteczka.Services.KeyWords
 @using DomowaBiblioteczka.Services.Medias
 @using Microsoft.AspNetCore.Authorization
+@using System.Text
 
 @inject DialogService DialogService
 @inject IMediasService mediaService
@@ -28,22 +29,30 @@ else
     <div class="container">
         <div class="row align-items-stretch">
             <!-- Top Row -->
-            <div class="col-4  border ">
+            <div class="col-4   ">
                 <RadzenStack AlignItems="AlignItems.Center" class="rz-mx-auto rz-my-12">
 
-                    <RadzenImage Path="@($"data:image/jpeg;base64,{Convert.ToBase64String(media.Image)}")" AlternateText="binary image" />
+                    @if(media.Image != null)
+                    {
+                        
+                        <RadzenImage Path="@($"data:image/jpeg;base64,{Convert.ToBase64String(media.Image)}")" AlternateText="binary image" />
+                    }
 
+                    <AuthorizeView Roles="Admin">
+                        <RadzenUpload Multiple="false" Accept="image/*" Url="upload/single" Style="width: 100%" InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "select file" }})" @ref=upload />
+                        <RadzenButton Text="Upload" Click=@(async args =>{media.Image = Convert.FromBase64String(upload.Url); }) class="rz-mt-4" Disabled="true" />          
+                    </AuthorizeView>
                 </RadzenStack>
             </div>
-            <div class="col-8 d-flex flex-column  border">
+            <div class="col-8 d-flex flex-column  ">
                 <div class="row align-items-stretch">
-                    <div class="col-12 border">
+                    <div class="col-12 ">
 
                         <div class="row align-items-stretch">
-                            <div class="col-6 d-flex flex-column border">
+                            <div class="col-6 d-flex flex-column ">
                                 <RadzenTextBox Value="@media.Title" Style=" width:100%;rz-h-auto"  />
                             </div>
-                            <div class="col-6 d-flex flex-column border">
+                            <div class="col-6 d-flex flex-column ">
                                 <RadzenTextBox Value="@media.Industry.Name" Style=" width:100%;rz-h-auto" />
 
                             </div>
@@ -51,13 +60,13 @@ else
                     </div>
                 </div>
                 <div class="row align-items-stretch">
-                    <div class="col-12 border">
+                    <div class="col-12 ">
                         <div class="row align-items-stretch">
-                            <div class="col-6 border">
+                            <div class="col-6 ">
 
                                 <RadzenTextArea @bind-Value="media.Industry.Description" MaxLength="1000" Style="width: 100%;resize:none" />
                             </div>
-                            <div class="col-6 border">
+                            <div class="col-6 ">
                                 <RadzenTextArea @bind-Value="media.Industry.Description" MaxLength="1000" Style="width: 100%;resize:none" />
 
                             </div>
@@ -68,29 +77,69 @@ else
         </div>
         <div class="row">
             
-            <div class="col-4 border">
+            <div class="col-4 ">
+                <AuthorizeView Roles="Admin">
+
+                <div class="col-12 ">
+                        <RadzenDropDown @bind-Value=authorId Data="@authors" TextProperty="Name" ValueProperty="Id" />
+                        <RadzenButton Icon="add" Click="@(arg=> media.Authors.Add(authors.First(a=>a.Id == authorId)))" Disabled="@(authorId == 0)"  />
+                </div>
+                </AuthorizeView>
                 <RadzenDataList TItem="Author" Data="media.Authors" PageSize="10" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true">
                     <Template Context="author">
+                        <RadzenColumn Size="6"  class="rz-p-4 ">
                             <RadzenText>@author.Name</RadzenText>
+                        </RadzenColumn>
+                           <AuthorizeView Roles="Admin"> 
+                                <RadzenColumn Size="6"  class="rz-p-4">
+                                    <RadzenButton Icon="Cancel" ButtonStyle="ButtonStyle.Warning" Click="@(arg=> media.Authors.Remove(author))"  />
+                                </RadzenColumn>
+                            </AuthorizeView>
                     </Template>
 
                 </RadzenDataList>
             </div>
             <!-- Bottom Row -->
-            <div class="col-4 border">
+            <div class="col-4 ">
                 <!-- ISBN, DATE REALISED, LENGTH UNIT, AUTHOR -->
-                <RadzenTextBox Name="ISBN" Value="@media.ISBN"/>
+                    <RadzenText>ISBN
+
+                        <RadzenTextBox Name="ISBN" Value="@media.ISBN"/>
+                    </RadzenText>
+                    <RadzenText>Realise Date:
+
                 <RadzenDatePicker Name="Realise Date" @bind-Value="@media.ReleseDate"/>
-                <RadzenTextBox Name="Length" Value="@media.Length.ToString()" />
-                <RadzenTextBox Name="Unit" Value="@media.MediaType.Unit.Symbole"/>
+                    </RadzenText>
+                    <RadzenText>Length[@media.MediaType.Unit.Symbole] </RadzenText>
+                    <RadzenTextBox Name="Length" Value="@media.Length.ToString()" />
                 
             </div>
-            <div class="col-4 border">
+            <div class="col-4 ">
+                    <AuthorizeView Roles="Admin">
+
+                        <div class="col-12 ">
+                            <RadzenDropDown @bind-Value=keyWordId Data="@keyWords" TextProperty="Word" ValueProperty="Id" />
+                            <RadzenButton Icon="add" Click="@(arg=> media.Keywords.Add(keyWords.First(a=>a.Id == keyWordId)))" Disabled="@(keyWordId == 0)" />
+                        </div>
+                    </AuthorizeView>
                 <RadzenDataList TItem="KeyWord" Data="media.Keywords" PageSize="10" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true">
                     <Template Context="keyWord">
+                        <RadzenColumn Size="6"  class="rz-p-4 ">
                         <RadzenText>@keyWord.Word</RadzenText>
+                        </RadzenColumn>
+
+                            <AuthorizeView Roles="Admin">
+                                <RadzenColumn Size="6" class="rz-p-4">
+                                    <RadzenButton Icon="Cancel" ButtonStyle="ButtonStyle.Warning" Click="@(arg=> media.Keywords.Remove(keyWord))" />
+                                </RadzenColumn>
+                            </AuthorizeView>
+
                     </Template>
                 </RadzenDataList>
+
+                <AuthorizeView Roles="Admin">
+                        <RadzenButton Text="Save" Click="@(arg=>SaveChanges())" />
+                    </AuthorizeView>
             </div>            
         </div>
     </div>
@@ -99,6 +148,8 @@ else
 @code {
     [Parameter]
     public string id { get; set; }
+
+    RadzenUpload upload;
 
     IEnumerable<Author> authors;
     IEnumerable<KeyWord> keyWords;
@@ -111,6 +162,8 @@ else
     private bool editing = false;
     public bool isAdmin = false;
 
+    public int authorId = 0;
+    public int keyWordId = 0;
 
     protected override async Task OnInitializedAsync()
     {
@@ -131,5 +184,11 @@ else
         media = await mediaService.GetByIdAsync(id);
         authors = await authorService.GetAllAsync();
         keyWords = await keywordService.GetAllAsync();
+    }
+
+
+    private async Task SaveChanges()
+    {
+          await  mediaService.UpdateAsync(media);
     }
 }
